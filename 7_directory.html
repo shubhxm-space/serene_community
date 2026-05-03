@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+<title>CommunityHub — Members Directory</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="tw-config.js"></script>
+<link rel="stylesheet" href="style.css">
+<style>body{font-family:'Inter',sans-serif;background:#f9f9ff;}</style>
+</head>
+<body class="bg-background text-on-surface">
+<header class="bg-white border-b border-slate-200 shadow-sm fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-16" id="app-header"></header>
+<div class="flex pt-16 min-h-screen">
+<aside class="bg-slate-50 border-r border-slate-200 fixed left-0 h-[calc(100vh-64px)] w-64 hidden lg:flex flex-col py-4 overflow-y-auto" id="app-sidebar"></aside>
+<main class="flex-1 lg:ml-64 p-6 xl:p-8">
+<div class="max-w-6xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between flex-wrap gap-4 mb-6 fade-up">
+    <div>
+      <h1 class="text-2xl font-bold text-on-surface">Members Directory</h1>
+      <p class="text-sm text-on-surface-variant mt-1">Discover and connect with your community</p>
+    </div>
+    <a href="5_member_profile.html" class="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:brightness-110 transition-all shadow-md">
+      <span class="material-symbols-outlined text-[18px]">person</span>My Profile
+    </a>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="flex gap-6 mb-5 p-4 bg-white rounded-xl border border-outline-variant shadow-sm fade-up-2">
+    <div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-primary text-[20px]">group</span><strong id="total-count">—</strong><span class="text-on-surface-variant">Members</span></div>
+    <div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-green-500 text-[20px]">fiber_manual_record</span><strong id="online-count">—</strong><span class="text-on-surface-variant">Online</span></div>
+    <div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-yellow-500 text-[20px]">star</span><strong id="new-count">—</strong><span class="text-on-surface-variant">New this week</span></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex items-center gap-3 flex-wrap mb-6 fade-up-2">
+    <div class="flex flex-1 items-center gap-2 bg-white border border-outline-variant rounded-full px-4 py-2.5 min-w-[220px] focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+      <span class="material-symbols-outlined text-outline text-[20px]">search</span>
+      <input id="search-inp" type="text" placeholder="Search by name, role, bio..." class="flex-1 text-sm border-none outline-none bg-transparent">
+    </div>
+    <div class="flex gap-1 bg-white border border-outline-variant rounded-full p-1 overflow-x-auto">
+      <button class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-primary text-white" data-filter="all">All</button>
+      <button class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" data-filter="online">🟢 Online</button>
+      <button class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" data-filter="new">✨ New</button>
+    </div>
+    <div class="flex gap-1">
+      <button class="view-btn w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-lg bg-primary text-white" data-view="grid" title="Grid">⊞</button>
+      <button class="view-btn w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-lg bg-white text-on-surface-variant hover:bg-surface-container" data-view="list" title="List">☰</button>
+    </div>
+  </div>
+
+  <!-- Members grid -->
+  <div id="members-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 fade-up-3">
+    ${Array(8).fill(0).map(()=>'<div class="skeleton h-52 rounded-xl"></div>').join('')}
+  </div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="hidden text-center py-20">
+    <span class="material-symbols-outlined text-6xl text-outline block mb-3">person_search</span>
+    <p class="text-lg font-semibold text-on-surface">No members found</p>
+    <p class="text-sm text-on-surface-variant mt-1">Try adjusting your search or filters</p>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex justify-center gap-2 mt-8" id="pagination"></div>
+</div>
+</main>
+</div>
+<div class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 flex items-center justify-around h-16 px-2 md:hidden" id="mobile-nav"></div>
+
+<script src="app.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app=initializeApp(FIREBASE_CONFIG),auth=getAuth(app),db=getFirestore(app);
+let allMembers=[],filtered=[],viewMode='grid',activeFilter='all',searchVal='',page=1;
+const PAGE_SIZE=12;
+const BG_COLORS=['bg-secondary-fixed text-on-secondary-fixed','bg-primary-fixed text-on-primary-fixed','bg-tertiary-fixed text-on-tertiary-fixed'];
+
+onAuthStateChanged(auth,async u=>{if(!u){location.href='1_welcome.html';return;}initLayout(u);await loadMembers();});
+
+async function loadMembers(){
+  try{
+    const snap=await getDocs(query(collection(db,'users'),orderBy('displayName')));
+    const cutoff=new Date(Date.now()-5*60*1000),weekAgo=new Date(Date.now()-7*24*60*60*1000);
+    let online=0,newC=0;
+    allMembers=[];
+    snap.forEach(d=>{const u=d.data();const isOnline=u.lastSeen?.toDate?.()>cutoff,isNew=u.joinedAt?.toDate?.()>weekAgo;if(isOnline)online++;if(isNew)newC++;allMembers.push({id:d.id,...u,isOnline,isNew});});
+    document.getElementById('total-count').textContent=allMembers.length;
+    document.getElementById('online-count').textContent=online;
+    document.getElementById('new-count').textContent=newC;
+  }catch(e){
+    // Demo data
+    const names=['Alex Thompson','Sarah Jenkins','Marcus Williams','Emma Davis','Liam Chen','Olivia Park','Noah Kim','Ava Johnson','Ethan Brown','Sophia Lee','James Wilson','Isabella Garcia'];
+    const roles=['Product Designer','Engineer','Community Lead','Developer','Researcher'];
+    allMembers=Array.from({length:24},(_,i)=>({id:'d'+i,displayName:names[i%names.length]+(i>=names.length?' '+(Math.floor(i/names.length)+1):''),role:roles[i%roles.length],bio:'Passionate community member.',isOnline:i<5,isNew:i<3}));
+    document.getElementById('total-count').textContent=allMembers.length;
+    document.getElementById('online-count').textContent=5;
+    document.getElementById('new-count').textContent=3;
+  }
+  applyFilters();
+}
+
+function applyFilters(){
+  let m=[...allMembers];
+  if(activeFilter==='online')m=m.filter(x=>x.isOnline);
+  if(activeFilter==='new')m=m.filter(x=>x.isNew);
+  if(searchVal){const q=searchVal.toLowerCase();m=m.filter(x=>(x.displayName||'').toLowerCase().includes(q)||(x.bio||'').toLowerCase().includes(q)||(x.role||'').toLowerCase().includes(q));}
+  filtered=m;page=1;render();
+}
+
+function render(){
+  const c=document.getElementById('members-container'),e=document.getElementById('empty-state');
+  if(!filtered.length){c.innerHTML='';e.classList.remove('hidden');renderPag();return;}
+  e.classList.add('hidden');
+  const slice=filtered.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
+  c.className=viewMode==='grid'?'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 fade-up-3':'space-y-3 fade-up-3';
+  c.innerHTML=slice.map((m,i)=>viewMode==='grid'?cardHTML(m,i):listHTML(m,i)).join('');
+  renderPag();
+}
+
+function cardHTML(m,i){
+  const initials=getInitials(m.displayName||'U');
+  const bg=BG_COLORS[i%3];
+  return `<div onclick="location.href='5_member_profile.html?id=${m.id}'" class="bg-white rounded-xl border border-outline-variant shadow-sm p-5 text-center cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all group">
+    <div class="relative inline-block mb-3">
+      <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-xl font-bold ${bg}">${initials}</div>
+      ${m.isOnline?'<div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>':''}
+    </div>
+    <div class="text-sm font-semibold text-on-surface truncate">${m.displayName||'Member'}</div>
+    <div class="text-xs text-on-surface-variant mt-0.5 mb-3">${m.role||'Community Member'}</div>
+    ${m.isNew?'<span class="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-bold mb-3 inline-block">✨ New</span>':''}
+    <div class="flex gap-2 justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+      <a href="5_member_profile.html?id=${m.id}" onclick="event.stopPropagation()" class="px-3 py-1 bg-surface-container rounded-lg text-xs font-semibold text-on-surface hover:bg-surface-container-high transition-colors">View</a>
+      <a href="8_community_chat.html?with=${m.id}" onclick="event.stopPropagation()" class="px-3 py-1 bg-primary text-white rounded-lg text-xs font-semibold hover:brightness-110 transition-all">Chat</a>
+    </div>
+  </div>`;
+}
+function listHTML(m,i){
+  const initials=getInitials(m.displayName||'U');const bg=BG_COLORS[i%3];
+  return `<div onclick="location.href='5_member_profile.html?id=${m.id}'" class="bg-white rounded-xl border border-outline-variant shadow-sm p-4 flex items-center gap-4 cursor-pointer hover:shadow-md hover:border-primary/20 transition-all">
+    <div class="relative flex-shrink-0">
+      <div class="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold ${bg}">${initials}</div>
+      ${m.isOnline?'<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>':''}
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-semibold text-on-surface">${m.displayName||'Member'}</span>
+        ${m.isNew?'<span class="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[10px] font-bold">New</span>':''}
+        ${m.isOnline?'<span class="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold">Online</span>':''}
+      </div>
+      <div class="text-xs text-on-surface-variant mt-0.5 truncate">${m.bio||m.role||'Community Member'}</div>
+    </div>
+    <a href="8_community_chat.html?with=${m.id}" onclick="event.stopPropagation()" class="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-lg text-xs font-semibold text-on-surface hover:bg-surface-container-high transition-colors flex-shrink-0">
+      <span class="material-symbols-outlined text-[14px]">chat</span>Message
+    </a>
+  </div>`;
+}
+
+function renderPag(){
+  const total=Math.ceil(filtered.length/PAGE_SIZE);
+  const pag=document.getElementById('pagination');
+  if(total<=1){pag.innerHTML='';return;}
+  let html='';
+  if(page>1)html+=`<button onclick="goPage(${page-1})" class="w-9 h-9 rounded-lg border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors">←</button>`;
+  for(let i=1;i<=total;i++)html+=`<button onclick="goPage(${i})" class="w-9 h-9 rounded-lg border text-sm font-semibold transition-colors ${i===page?'bg-primary border-primary text-white':'border-outline-variant text-on-surface-variant hover:bg-surface-container'}">${i}</button>`;
+  if(page<total)html+=`<button onclick="goPage(${page+1})" class="w-9 h-9 rounded-lg border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors">→</button>`;
+  pag.innerHTML=html;
+}
+window.goPage=p=>{page=p;render();window.scrollTo({top:0,behavior:'smooth'});};
+
+document.querySelectorAll('.filter-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.filter-btn').forEach(x=>{x.className='filter-btn px-4 py-1.5 rounded-full text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-colors';});
+  b.className='filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-primary text-white';
+  activeFilter=b.dataset.filter;applyFilters();
+}));
+let st;document.getElementById('search-inp').addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>{searchVal=e.target.value.trim();applyFilters();},280);});
+document.querySelectorAll('.view-btn').forEach(b=>b.addEventListener('click',()=>{
+  viewMode=b.dataset.view;
+  document.querySelectorAll('.view-btn').forEach(x=>{x.className='view-btn w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-lg bg-white text-on-surface-variant hover:bg-surface-container';});
+  b.className='view-btn w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-lg bg-primary text-white';
+  render();
+}));
+</script>
+</body>
+</html>

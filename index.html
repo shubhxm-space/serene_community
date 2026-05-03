@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+<title>CommunityHub — Sign In</title>
+<meta name="description" content="Sign in to CommunityHub, your private community circle.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="tw-config.js"></script>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { font-family:'Inter',sans-serif; background:#f9f9ff; margin:0; overflow:hidden; }
+</style>
+</head>
+<body class="text-on-background flex flex-col min-h-screen">
+
+<!-- Animated mesh gradient background -->
+<div class="mesh-gradient-container">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+</div>
+
+<main class="flex-grow flex items-center justify-center p-lg relative z-10">
+  <div class="w-full max-w-[480px] glass-card shadow-2xl rounded-xl overflow-hidden fade-up">
+    <div class="p-xl md:p-12 flex flex-col items-center">
+
+      <!-- Brand -->
+      <div class="mb-lg flex flex-col items-center">
+        <div class="w-16 h-16 bg-primary-container rounded-xl flex items-center justify-center mb-md shadow-md shadow-primary/20">
+          <span class="material-symbols-outlined text-on-primary-container text-4xl">hub</span>
+        </div>
+        <h1 class="text-3xl font-bold text-on-surface tracking-tight">CommunityHub</h1>
+        <p class="text-sm text-on-surface-variant text-center mt-1">Connect with your private circle today.</p>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="w-full flex gap-1 p-1 bg-white/40 rounded-lg mb-lg">
+        <button id="tab-signin" onclick="switchTab('signin')" class="flex-1 py-2 rounded-md text-sm font-semibold bg-primary text-white shadow transition-all duration-200">Sign In</button>
+        <button id="tab-signup" onclick="switchTab('signup')" class="flex-1 py-2 rounded-md text-sm font-semibold text-on-surface-variant hover:bg-white/60 transition-all duration-200">Sign Up</button>
+      </div>
+
+      <!-- Error box -->
+      <div id="auth-error" class="hidden w-full text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-md py-sm text-center mb-md"></div>
+
+      <!-- Sign In form -->
+      <form id="form-signin" class="w-full space-y-md">
+        <div class="flex flex-col gap-xs">
+          <label class="text-label-md text-on-surface-variant" for="si-email">Email Address</label>
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-md text-outline text-[20px]">mail</span>
+            <input id="si-email" type="email" placeholder="name@company.com" autocomplete="email"
+              class="w-full pl-10 pr-md py-md bg-white/70 border border-white/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm text-on-surface placeholder:text-outline/60"/>
+          </div>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <div class="flex justify-between items-center">
+            <label class="text-label-md text-on-surface-variant" for="si-pass">Password</label>
+            <span id="forgot-btn" class="text-label-md text-primary hover:underline cursor-pointer">Forgot password?</span>
+          </div>
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-md text-outline text-[20px]">lock</span>
+            <input id="si-pass" type="password" placeholder="••••••••" autocomplete="current-password"
+              class="w-full pl-10 pr-12 py-md bg-white/70 border border-white/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm text-on-surface placeholder:text-outline/60"/>
+            <button type="button" id="toggle-pass" class="absolute right-md text-outline hover:text-on-surface-variant">
+              <span class="material-symbols-outlined text-[20px]">visibility</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center gap-sm">
+          <input type="checkbox" id="remember" class="w-4 h-4 rounded border-outline/50 text-primary focus:ring-primary"/>
+          <label for="remember" class="text-label-md text-on-surface-variant cursor-pointer">Keep me logged in</label>
+        </div>
+        <button id="btn-signin" type="submit"
+          class="w-full bg-primary text-white text-sm font-semibold py-md rounded-lg shadow-sm hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-sm">
+          <span id="signin-label">Sign In</span>
+          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+      </form>
+
+      <!-- Sign Up form -->
+      <form id="form-signup" class="w-full space-y-md hidden">
+        <div class="flex flex-col gap-xs">
+          <label class="text-label-md text-on-surface-variant" for="su-name">Display Name</label>
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-md text-outline text-[20px]">person</span>
+            <input id="su-name" type="text" placeholder="Your full name" autocomplete="name"
+              class="w-full pl-10 pr-md py-md bg-white/70 border border-white/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm text-on-surface placeholder:text-outline/60"/>
+          </div>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="text-label-md text-on-surface-variant" for="su-email">Email Address</label>
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-md text-outline text-[20px]">mail</span>
+            <input id="su-email" type="email" placeholder="name@company.com" autocomplete="email"
+              class="w-full pl-10 pr-md py-md bg-white/70 border border-white/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm text-on-surface placeholder:text-outline/60"/>
+          </div>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="text-label-md text-on-surface-variant" for="su-pass">Password</label>
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-md text-outline text-[20px]">lock</span>
+            <input id="su-pass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"
+              class="w-full pl-10 pr-md py-md bg-white/70 border border-white/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm text-on-surface placeholder:text-outline/60"/>
+          </div>
+          <!-- Strength bar -->
+          <div class="flex gap-1 mt-1" id="strength-bar">
+            <div class="h-1 flex-1 rounded bg-surface-dim" id="sb1"></div>
+            <div class="h-1 flex-1 rounded bg-surface-dim" id="sb2"></div>
+            <div class="h-1 flex-1 rounded bg-surface-dim" id="sb3"></div>
+          </div>
+        </div>
+        <button id="btn-signup" type="submit"
+          class="w-full bg-primary text-white text-sm font-semibold py-md rounded-lg shadow-sm hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-sm">
+          <span id="signup-label">Create Account</span>
+          <span class="material-symbols-outlined text-[18px]">person_add</span>
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="w-full mt-xl">
+        <div class="relative flex items-center justify-center mb-lg">
+          <div class="w-full border-t border-outline-variant/30"></div>
+          <span class="absolute px-md bg-transparent text-label-md text-outline">or continue with</span>
+        </div>
+        <button id="google-btn"
+          class="w-full flex items-center justify-center gap-sm py-sm px-md border border-white/50 bg-white/50 rounded-lg text-label-md text-on-surface hover:bg-white/80 transition-colors">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 32.8 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.9 18.9 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.5 6.5 29.5 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.6-3.3-11.2-8H6.7C10.1 37.8 16.5 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.3 4.1-4.2 5.5l6.2 5.2C37.7 39.1 44 34.1 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="p-lg flex justify-center gap-xl relative z-10">
+  <a href="#" class="text-label-md text-outline hover:text-on-surface transition-colors">Privacy Policy</a>
+  <a href="#" class="text-label-md text-outline hover:text-on-surface transition-colors">Terms of Service</a>
+  <a href="#" class="text-label-md text-outline hover:text-on-surface transition-colors">Support</a>
+</footer>
+
+<script src="app.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+         signInWithPopup, GoogleAuthProvider, onAuthStateChanged, updateProfile,
+         sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app  = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const gp   = new GoogleAuthProvider();
+
+onAuthStateChanged(auth, u => { if (u) location.href = '2_community_home.html'; });
+
+// Tab switching
+function switchTab(tab) {
+  const isSignin = tab === 'signin';
+  document.getElementById('form-signin').classList.toggle('hidden', !isSignin);
+  document.getElementById('form-signup').classList.toggle('hidden', isSignin);
+  document.getElementById('tab-signin').className = `flex-1 py-2 rounded-md text-sm font-semibold transition-all duration-200 ${isSignin?'bg-primary text-white shadow':'text-on-surface-variant hover:bg-white/60'}`;
+  document.getElementById('tab-signup').className = `flex-1 py-2 rounded-md text-sm font-semibold transition-all duration-200 ${!isSignin?'bg-primary text-white shadow':'text-on-surface-variant hover:bg-white/60'}`;
+  hideError();
+}
+window.switchTab = switchTab;
+
+function showError(msg) { const e=document.getElementById('auth-error'); e.textContent=msg; e.classList.remove('hidden'); }
+function hideError() { document.getElementById('auth-error').classList.add('hidden'); }
+function setLoading(btnId, labelId, text, loading) {
+  const btn=document.getElementById(btnId); btn.disabled=loading;
+  document.getElementById(labelId).innerHTML=loading?'<div class="spinner"></div>':text;
+}
+
+async function syncUser(user) {
+  await setDoc(doc(db,'users',user.uid),{
+    uid:user.uid, displayName:user.displayName||user.email.split('@')[0],
+    email:user.email, photoURL:user.photoURL||'', lastSeen:serverTimestamp()
+  },{merge:true});
+}
+
+// Password visibility
+document.getElementById('toggle-pass').addEventListener('click', () => {
+  const inp=document.getElementById('si-pass');
+  const ico=document.querySelector('#toggle-pass .material-symbols-outlined');
+  inp.type=inp.type==='password'?'text':'password';
+  ico.textContent=inp.type==='password'?'visibility':'visibility_off';
+});
+
+// Password strength
+document.getElementById('su-pass').addEventListener('input', e => {
+  const n=e.target.value.length;
+  document.getElementById('sb1').className=`h-1 flex-1 rounded ${n>=4?'bg-red-400':'bg-surface-dim'}`;
+  document.getElementById('sb2').className=`h-1 flex-1 rounded ${n>=7?'bg-yellow-400':'bg-surface-dim'}`;
+  document.getElementById('sb3').className=`h-1 flex-1 rounded ${n>=10?'bg-green-400':'bg-surface-dim'}`;
+});
+
+// Sign In
+document.getElementById('form-signin').addEventListener('submit', async e => {
+  e.preventDefault(); hideError();
+  const email=document.getElementById('si-email').value.trim();
+  const pass=document.getElementById('si-pass').value;
+  if (!email||!pass) return showError('Please enter your email and password.');
+  setLoading('btn-signin','signin-label','Sign In',true);
+  try {
+    const cred=await signInWithEmailAndPassword(auth,email,pass);
+    await syncUser(cred.user);
+    location.href='2_community_home.html';
+  } catch(err) {
+    showError(err.code==='auth/invalid-credential'?'Invalid email or password.':err.message);
+    setLoading('btn-signin','signin-label','Sign In',false);
+  }
+});
+
+// Sign Up
+document.getElementById('form-signup').addEventListener('submit', async e => {
+  e.preventDefault(); hideError();
+  const name=document.getElementById('su-name').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pass=document.getElementById('su-pass').value;
+  if (!name||!email||!pass) return showError('Please fill in all fields.');
+  if (pass.length<6) return showError('Password must be at least 6 characters.');
+  setLoading('btn-signup','signup-label','Create Account',true);
+  try {
+    const cred=await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(cred.user,{displayName:name});
+    await setDoc(doc(db,'users',cred.user.uid),{
+      uid:cred.user.uid,displayName:name,email,photoURL:'',
+      role:'member',joinedAt:serverTimestamp(),lastSeen:serverTimestamp()
+    });
+    location.href='2_community_home.html';
+  } catch(err) {
+    showError(err.code==='auth/email-already-in-use'?'Email already in use. Try signing in.':err.message);
+    setLoading('btn-signup','signup-label','Create Account',false);
+  }
+});
+
+// Google
+document.getElementById('google-btn').addEventListener('click', async () => {
+  hideError();
+  try {
+    const cred=await signInWithPopup(auth,gp);
+    await syncUser(cred.user);
+    location.href='2_community_home.html';
+  } catch(err) { if(err.code!=='auth/popup-closed-by-user') showError(err.message); }
+});
+
+// Forgot password
+document.getElementById('forgot-btn').addEventListener('click', async () => {
+  const email=document.getElementById('si-email').value.trim();
+  if (!email) return showError('Enter your email above first.');
+  await sendPasswordResetEmail(auth,email);
+  showToast('Password reset email sent!','info');
+});
+</script>
+</body>
+</html>
