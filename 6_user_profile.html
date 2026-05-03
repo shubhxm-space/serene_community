@@ -157,6 +157,8 @@ let currentUser;
 onAuthStateChanged(auth,async u=>{
   if(!u){location.href='1_welcome.html';return;}
   currentUser=u;initLayout(u);
+  try { await updateDoc(doc(db,'users',u.uid),{lastSeen:serverTimestamp()}); } catch(_){}
+  setInterval(()=>updateDoc(doc(db,'users',u.uid),{lastSeen:serverTimestamp()}).catch(()=>null), 3*60*1000);
   document.getElementById('settings-initials')&&(document.getElementById('settings-initials').textContent=getInitials(u.displayName||'U'));
   document.getElementById('settings-avatar').textContent=getInitials(u.displayName||'U');
   document.getElementById('settings-name-display').textContent=u.displayName||'Member';
