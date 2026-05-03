@@ -140,6 +140,8 @@ const EMOJIS=['😀','😂','❤️','👍','🔥','🎉','🙌','💡','✅','�
 onAuthStateChanged(auth,async u=>{
   if(!u){location.href='1_welcome.html';return;}
   currentUser=u;initLayout(u);
+  try { await updateDoc(doc(db,'users',u.uid),{lastSeen:serverTimestamp()}); } catch(_){}
+  setInterval(()=>updateDoc(doc(db,'users',u.uid),{lastSeen:serverTimestamp()}).catch(()=>null), 3*60*1000);
   buildChannels();buildEmojiGrid();
   await loadAllMembers();
   loadDMList();
