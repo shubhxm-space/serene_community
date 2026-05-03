@@ -119,14 +119,17 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, getDocs, collection, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, collection, query, where, orderBy, limit, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp(FIREBASE_CONFIG),auth=getAuth(app),db=getFirestore(app);
 let viewedId=new URLSearchParams(location.search).get('id'),currentUser;
 
 onAuthStateChanged(auth,async u=>{
   if(!u){location.href='1_welcome.html';return;}
   currentUser=u; if(!viewedId)viewedId=u.uid;
-  initLayout(u);await loadProfile(viewedId);await loadPosts(viewedId);
+  initLayout(u);
+  try { await updateDoc(doc(db,'users',u.uid),{lastSeen:serverTimestamp()}); } catch(_){}
+  setInterval(()=>updateDoc(doc(db,'users',u.uid),{lastSeen:serverTimestamp()}).catch(()=>null), 3*60*1000);
+  await loadProfile(viewedId);await loadPosts(viewedId);
 });
 
 async function loadProfile(uid){
