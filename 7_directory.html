@@ -75,13 +75,19 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp(FIREBASE_CONFIG),auth=getAuth(app),db=getFirestore(app);
 let allMembers=[],filtered=[],viewMode='grid',activeFilter='all',searchVal='',page=1;
 const PAGE_SIZE=12;
 const BG_COLORS=['bg-secondary-fixed text-on-secondary-fixed','bg-primary-fixed text-on-primary-fixed','bg-tertiary-fixed text-on-tertiary-fixed'];
 
-onAuthStateChanged(auth,async u=>{if(!u){location.href='1_welcome.html';return;}initLayout(u);await loadMembers();});
+onAuthStateChanged(auth,async u=>{
+  if(!u){location.href='1_welcome.html';return;}
+  initLayout(u);
+  try { await updateDoc(doc(db,'users',u.uid),{lastSeen:serverTimestamp()}); } catch(_){}
+  setInterval(()=>updateDoc(doc(db,'users',u.uid),{lastSeen:serverTimestamp()}).catch(()=>null), 3*60*1000);
+  await loadMembers();
+});
 
 async function loadMembers(){
   try{
